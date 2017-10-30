@@ -26,7 +26,6 @@ public final class PoliteScraper {
     private static final String MSG_INTERRUPTED_FROM_SLEEP = "Unexpectedly interrupted from sleep";
     private static final String MSG_PAGE_NOT_FINISHED = "Html had not been retrieved fully.";
 
-    private final WebCache webCache;
     private final WebDriver driver;
     private final TimeProvider timeProvider;
     private final Logger log;
@@ -47,7 +46,6 @@ public final class PoliteScraper {
     public static final class PoliteScraperBuilder {
 
         private final WebDriver driver;
-        private final WebCache cache;
         private final PageBrain brain;
         private TimeProvider timeProvider;
         private int backOffMillis = DEFAULT_BACK_OFF_SECONDS;
@@ -58,9 +56,8 @@ public final class PoliteScraper {
         private int maxWaitLoad = DEFAULT_MAX_WAIT_LOAD;
         private int stdDevWaitBetween = DEFAULT_STD_DEV_WAIT_BETWEEN;
 
-        public PoliteScraperBuilder(final WebDriver driver, final WebCache cache, final PageBrain brain) {
+        public PoliteScraperBuilder(final WebDriver driver, final PageBrain brain) {
             this.driver = driver;
-            this.cache = cache;
             this.brain = brain;
         }
 
@@ -126,7 +123,6 @@ public final class PoliteScraper {
     }
 
     private PoliteScraper(final PoliteScraperBuilder builder) {
-        webCache = builder.cache;
         driver = builder.driver;
         timeProvider = builder.timeProvider;
         brain = builder.brain;
@@ -143,8 +139,8 @@ public final class PoliteScraper {
     }
 
     public void run() {
-        while (webCache.hasNext()) {
-            String url = webCache.getNextUrl();
+        while (brain.hasNext()) {
+            String url = brain.getNextUrl();
             try {
                 brain.accept(pageOf(url));
             } catch (ScrapingException e) {

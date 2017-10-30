@@ -9,4 +9,8 @@ public interface PageBrain {
     boolean isFinishedLoading(String html);
 
     void accept(String s);
+
+    boolean hasNext();
+
+    String getNextUrl();
 }
