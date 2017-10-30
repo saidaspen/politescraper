@@ -1,0 +1,24 @@
+group 'se.redsharp.politescraper'
+version '1.0-SNAPSHOT'
+
+apply plugin: 'java'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+
+    compile group: 'com.codeborne', name: 'phantomjsdriver', version: '1.2.1'
+    compile group: 'org.seleniumhq.selenium', name: 'selenium-java', version: '2.53.1'
+    compile 'org.jsoup:jsoup:1.10.3'
+    compile 'org.mongodb:mongodb-driver:3.5.0'
+    compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.8.2'
+    compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.8.2'
+
+    testCompile group: 'junit', name: 'junit', version: '4.11'
+    testCompile group: 'org.hamcrest', name: 'java-hamcrest', version: '2.0.0.0'
+    testCompile 'org.mockito:mockito-core:2.8.47'
+}

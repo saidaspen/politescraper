@@ -1,0 +1,41 @@
+# Compiled class file
+*.class
+
+# Log file
+*.log
+logs/*
+logs/
+
+# BlueJ files
+*.ctxt
+
+# Mobile Tools for Java (J2ME)
+.mtj.tmp/
+
+# Package Files #
+*.jar
+*.war
+*.ear
+*.zip
+*.tar.gz
+*.rar
+*.gz
+
+#Gradle
+.gradle
+gradle/
+gradlew
+gradlew.bat
+
+# Build
+build
+
+# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+hs_err_pid*
+
+# Editors
+.idea/
+*.iml
+out/
+
+app.properties
