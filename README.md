@@ -43,6 +43,6 @@ Sysadmins put a robot.txt file there with instructions and policy-rules for webc
 MIT
 
 ---
-> [saidaspen.com](http://www.saidaspen.com) &nbsp;&middot;&nbsp;
-> GitHub [@saidaspen](https://github.com/saidaspen) &nbsp;&middot;&nbsp;
+[saidaspen.com](http://www.saidaspen.com) &nbsp;&middot;&nbsp;
+GitHub [@saidaspen](https://github.com/saidaspen)
 
