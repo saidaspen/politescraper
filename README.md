@@ -10,7 +10,6 @@ Don't scale this up into a multi-threaded DDOS monstrousity.
 
 Be polite. Be responsible.
 
-
 ## Key features
 * Uses Selenium headless browser as driver.
 * Back-off when requests are rejected.
@@ -27,15 +26,15 @@ Don't be a pain for the sys-admins of the web-page.
 Before you start scraping a web-page, best practice is to check for a robot.txt file in the root of the domain.
 Sysadmins put a robot.txt file there with instructions and policy-rules for webcrawlers and scrapers. To be polite, follow the instructions and rules specified in it.
 
-
 ## How To Use
 
-## Dependencies
-
-* Selenium
-* SLF4J
-
-## Credits
+## Dependencies and credits
+* [Selenium](http://www.seleniumhq.org/)
+* [SLF4J](https://www.slf4j.org/)
+* [Phtanom JS](http://phantomjs.org/)
+* [JUnit](http://junit.org/junit5/)
+* [Mockito](http://site.mockito.org/)
+* [Hamcrest](http://hamcrest.org/)
 
 #### License
 
