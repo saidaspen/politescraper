@@ -8,13 +8,15 @@ We don't want to do that. We want to be polite.
 
 Don't scale this up into a multi-threaded DDOS monstrousity. 
 
-Be polite. Be responsible.
+Don't be in a hurry. Be polite. Be responsible.
 
 ## Key features
 * Uses Selenium headless browser as driver.
 * Back-off when requests are rejected.
 * Randomizes time between sequential requests according to guassian distribution.
 * Add one class (implementing interface PageBrain) for each type of web-site you want to scrape.
+* It does not do concurrent requests (by design)
+* It defaults to having quite long waiting in between requests.
 
 ## Getting started
 
@@ -41,4 +43,6 @@ Sysadmins put a robot.txt file there with instructions and policy-rules for webc
 MIT
 
 ---
+> [saidaspen.com](http://www.saidaspen.com) &nbsp;&middot;&nbsp;
+> GitHub [@saidaspen](https://github.com/saidaspen) &nbsp;&middot;&nbsp;
 
