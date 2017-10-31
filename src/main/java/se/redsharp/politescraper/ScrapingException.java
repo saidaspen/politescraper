@@ -1,11 +1,14 @@
 package se.redsharp.politescraper;
 
-public class ScrapingException extends Throwable {
+class ScrapingException extends Throwable {
 
-    public ScrapingException(Object p0, InterruptedException e) {
+    private static final long serialVersionUID = 5843098092228540344L;
+
+    ScrapingException(String msg, Exception cause) {
+        super(msg, cause);
     }
 
-    public ScrapingException(String s) {
-
+    ScrapingException(String msg) {
+        super(msg);
     }
 }

@@ -2,15 +2,15 @@ package se.redsharp.politescraper;
 
 public interface PageBrain {
 
-    boolean shouldBackOffAndRetry(String scrapedHtml);
+    boolean hasNext();
 
-    void handleError(String url, String message);
+    String nextUrl();
+
+    void notifyDone(String s);
+
+    boolean shouldBackOffAndRetry(String scrapedHtml);
 
     boolean isFinishedLoading(String html);
 
-    void accept(String s);
-
-    boolean hasNext();
-
-    String getNextUrl();
+    void handleError(String url, String message);
 }
