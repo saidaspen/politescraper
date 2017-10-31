@@ -28,6 +28,12 @@ Before you start scraping a web-page, best practice is to check for a robot.txt 
 Sysadmins put a robot.txt file there with instructions and policy-rules for webcrawlers and scrapers. To be polite, follow the instructions and rules specified in it.
 
 ## How To Use
+To get started using the library you need to implement a couple of classes yourself. 
+There are three pieces of code that you will need (all three of which there is example-code for in the repository).
+
+* WebCache
+* PageBrain
+* Client code to glue it all together
 
 ## Dependencies and credits
 Polite Scraper uses several other open source projects.
