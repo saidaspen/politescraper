@@ -20,8 +20,7 @@ Don't be in a hurry. Be polite. Be responsible.
 
 ## Getting started
 
-## Webscraping
-### Be polite
+## Webscraping - Be polite
 When scraping web-pages you should be polite. Make sure that you do not scale up your scraping to a level which affects or degrades the service that the site is providing.
 Don't be a pain for the sys-admins of the web-page.
 
@@ -31,6 +30,8 @@ Sysadmins put a robot.txt file there with instructions and policy-rules for webc
 ## How To Use
 
 ## Dependencies and credits
+Polite Scraper uses several other open source projects.
+
 * [Selenium](http://www.seleniumhq.org/)
 * [SLF4J](https://www.slf4j.org/)
 * [Phtanom JS](http://phantomjs.org/)
