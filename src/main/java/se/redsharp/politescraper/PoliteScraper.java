@@ -2,8 +2,8 @@ package se.redsharp.politescraper;
 
 import java.security.*;
 import java.util.*;
+import org.apache.logging.log4j.*;
 import org.openqa.selenium.*;
-import org.slf4j.*;
 
 @SuppressWarnings({"unused", "WeakerAccess"})
 public final class PoliteScraper {
@@ -28,7 +28,6 @@ public final class PoliteScraper {
 
     private final WebDriver driver;
     private final TimeProvider timeProvider;
-    private final Logger log = LoggerFactory.getLogger(PoliteScraper.class);
     private final PageBrain brain;
     private final Random rand = new SecureRandom();
     private final WebCache cache;
@@ -39,6 +38,7 @@ public final class PoliteScraper {
     private final long waitLoad;
     private final long maxWaitLoad;
     private final double stdDevWaitBetween;
+    private final Logger log;
 
     private long lastRequest;
     private long backOffMillis;
@@ -138,19 +138,24 @@ public final class PoliteScraper {
         stdDevWaitBetween = builder.stdDevWaitBetween;
         lastRequest = timeProvider.currentTimeMillis();
         backOffMillis = originalBackOfMillis;
+        log = LogManager.getLogger(getClass().getSimpleName());
         rand.setSeed(builder.seed);
     }
 
     public void run() {
         while (brain.hasNext()) {
-            String url = brain.nextUrl();
+            String url = brain.nextUrl().get();
+            log.info("Next url {}", url);
             try {
-                if (cache.contains(url)) {
+                Optional<String> cachedPage = cache.get(url);
+                if (cachedPage.isPresent()) {
                     log.info("Url {} already exist in cache.", url);
+                    brain.notifyDone(url, cachedPage.get());
                 } else {
-                    cache.insert(url, pageOf(url));
+                    String html = pageOf(url);
+                    cache.insert(url, html);
+                    brain.notifyDone(url, html);
                 }
-                brain.notifyDone(url);
             } catch (ScrapingException e) {
                 brain.handleError(url, e.getMessage());
             }
@@ -200,9 +205,9 @@ public final class PoliteScraper {
     private String waitForPageLoad() throws InterruptedException, ScrapingException {
         timeProvider.sleep(waitLoad);
         final String html = driver.getPageSource();
-        long currentTime = timeProvider.currentTimeMillis();
+        final long currentTime = timeProvider.currentTimeMillis();
         boolean timeOut = currentTime > lastRequest + maxWaitLoad;
-        if (brain.isFinishedLoading(html)) {
+        if (brain.isFinishedLoading(driver.getCurrentUrl(), html)) {
             return html;
         } else if (timeOut) {
             throw new ScrapingException("URL '" + driver.getCurrentUrl() + "' timed out after " + maxWaitLoad + " seconds.");

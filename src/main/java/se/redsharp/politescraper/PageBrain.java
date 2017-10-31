@@ -1,16 +1,18 @@
 package se.redsharp.politescraper;
 
+import java.util.*;
+
 public interface PageBrain {
 
-    boolean hasNext();
-
-    String nextUrl();
-
-    void notifyDone(String s);
+    void notifyDone(String url, String html);
 
     boolean shouldBackOffAndRetry(String scrapedHtml);
 
-    boolean isFinishedLoading(String html);
+    boolean isFinishedLoading(String url, String html);
 
     void handleError(String url, String message);
+
+    boolean hasNext();
+
+    Optional<String> nextUrl();
 }
