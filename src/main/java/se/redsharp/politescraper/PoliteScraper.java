@@ -25,6 +25,8 @@ public final class PoliteScraper {
     private static final String MSG_BACKING_OFF = "Backing off {} minutes.";
     private static final String MSG_INTERRUPTED_FROM_SLEEP = "Unexpectedly interrupted from sleep";
     private static final String MSG_PAGE_NOT_FINISHED = "Html had not been retrieved fully.";
+    private static final String MSG_WAIT_BETWEEN_CALLS = "Wait between consecutive calls.\t {} seconds.";
+    private static final String MSG_WAIT_PAGE_LOAD = "Waiting for page to load.";
 
     private final WebDriver driver;
     private final TimeProvider timeProvider;
@@ -141,7 +143,6 @@ public final class PoliteScraper {
     public void run() {
         Optional<String> url = brain.nextUrl();
         while (url.isPresent()) {
-            log.info("Next url {}", url.get());
             try {
                 brain.notifyDone(url.get(), pageOf(url.get()));
             } catch (ScrapingException e) {
@@ -180,6 +181,7 @@ public final class PoliteScraper {
             final long waitBetweenCalls = (long) (Math.abs(rand.nextGaussian() * stdDevWaitBetween) + minWaitBetween);
             long waitFor = lastRequest + waitBetweenCalls - timeProvider.currentTimeMillis();
             if (waitFor > 0) {
+                log.info(MSG_WAIT_BETWEEN_CALLS, waitFor / 1000);
                 timeProvider.sleep(waitFor);
             }
             log.info("Requesting URL: {}", url);
@@ -192,6 +194,7 @@ public final class PoliteScraper {
     }
 
     private String waitForPageLoad() throws InterruptedException, ScrapingException {
+        log.debug(MSG_WAIT_PAGE_LOAD);
         timeProvider.sleep(waitLoad);
         final String html = driver.getPageSource();
         final long currentTime = timeProvider.currentTimeMillis();
