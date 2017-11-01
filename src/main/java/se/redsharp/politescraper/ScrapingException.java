@@ -1,5 +1,8 @@
 package se.redsharp.politescraper;
 
+/**
+ *  Exception type to encapsulate any kind of error happening during scraping.
+ */
 class ScrapingException extends Throwable {
 
     private static final long serialVersionUID = 5843098092228540344L;
