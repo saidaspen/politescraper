@@ -30,7 +30,6 @@ public final class PoliteScraper {
     private final TimeProvider timeProvider;
     private final PageBrain brain;
     private final Random rand = new SecureRandom();
-    private final WebCache cache;
 
     private final long minWaitBetween;
     private final long originalBackOfMillis;
@@ -48,7 +47,6 @@ public final class PoliteScraper {
 
         private final WebDriver driver;
         private final PageBrain brain;
-        private final WebCache cache;
         private TimeProvider timeProvider;
         private long backOffMillis = DEFAULT_BACK_OFF_SECONDS;
         private long seed = System.nanoTime();
@@ -58,10 +56,9 @@ public final class PoliteScraper {
         private long maxWaitLoad = DEFAULT_MAX_WAIT_LOAD;
         private long stdDevWaitBetween = DEFAULT_STD_DEV_WAIT_BETWEEN;
 
-        public PoliteScraperBuilder(final WebDriver driver, final PageBrain brain, WebCache cache) {
+        public PoliteScraperBuilder(final WebDriver driver, final PageBrain brain) {
             this.driver = driver;
             this.brain = brain;
-            this.cache = cache;
         }
 
         public PoliteScraperBuilder timeProvider(final TimeProvider timeProvider) {
@@ -127,7 +124,6 @@ public final class PoliteScraper {
 
     private PoliteScraper(final PoliteScraperBuilder builder) {
         driver = builder.driver;
-        cache = builder.cache;
         timeProvider = builder.timeProvider;
         brain = builder.brain;
         originalBackOfMillis = builder.backOffMillis;
@@ -143,22 +139,15 @@ public final class PoliteScraper {
     }
 
     public void run() {
-        while (brain.hasNext()) {
-            String url = brain.nextUrl().get();
-            log.info("Next url {}", url);
+        Optional<String> url = brain.nextUrl();
+        while (url.isPresent()) {
+            log.info("Next url {}", url.get());
             try {
-                Optional<String> cachedPage = cache.get(url);
-                if (cachedPage.isPresent()) {
-                    log.info("Url {} already exist in cache.", url);
-                    brain.notifyDone(url, cachedPage.get());
-                } else {
-                    String html = pageOf(url);
-                    cache.insert(url, html);
-                    brain.notifyDone(url, html);
-                }
+                brain.notifyDone(url.get(), pageOf(url.get()));
             } catch (ScrapingException e) {
-                brain.handleError(url, e.getMessage());
+                brain.handleError(url.get(), e.getMessage());
             }
+            url = brain.nextUrl();
         }
     }
 

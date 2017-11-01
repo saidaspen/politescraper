@@ -12,7 +12,5 @@ public interface PageBrain {
 
     void handleError(String url, String message);
 
-    boolean hasNext();
-
     Optional<String> nextUrl();
 }

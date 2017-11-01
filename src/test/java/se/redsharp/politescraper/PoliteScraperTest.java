@@ -18,11 +18,10 @@ public final class PoliteScraperTest {
     private static final int SEED = 42;
     private static final String URL = "not really an url";
     private static final String SOURCE = "some page source";
-    private final WebCache cache = mock(WebCache.class);
     private final PageBrain brain = mock(PageBrain.class);
     private final WebDriver driver = mock(WebDriver.class);
     private final TimeProvider timeProvider = mock(TimeProvider.class);
-    private final PoliteScraper defaultScraper = new PoliteScraperBuilder(driver, brain, cache).seed(SEED).timeProvider(timeProvider).build();
+    private final PoliteScraper defaultScraper = new PoliteScraperBuilder(driver, brain).seed(SEED).timeProvider(timeProvider).build();
 
     @Before
     public void setUp() throws Exception {
@@ -32,16 +31,15 @@ public final class PoliteScraperTest {
 
     @Test
     public void returnsIfDoesNotHaveUrls() throws Exception {
-        when(brain.hasNext()).thenReturn(false);
+        when(brain.nextUrl()).thenReturn(Optional.empty());
         defaultScraper.run();
-        verifyNoMoreInteractions(cache, driver);
+        verify(brain, atMost(1)).nextUrl();
+        verifyNoMoreInteractions(brain, driver);
     }
 
     @Test
     public void pageAlreadyInCache() throws Exception {
-        when(brain.hasNext()).thenReturn(true).thenReturn(false);
         when(brain.nextUrl()).thenReturn(Optional.of(URL));
-        when(cache.get(anyString())).thenReturn(Optional.ofNullable(SOURCE));
         defaultScraper.run();
         verify(brain, times(1)).notifyDone(URL, SOURCE);
     }
@@ -51,9 +49,7 @@ public final class PoliteScraperTest {
         when(timeProvider.currentTimeMillis())
                 .thenReturn(0L)
                 .thenReturn(1L);
-        when(brain.hasNext()).thenReturn(true).thenReturn(false);
-        when(brain.nextUrl()).thenReturn(Optional.of(URL));
-        when(cache.get(anyString())).thenReturn(Optional.empty());
+        when(brain.nextUrl()).thenReturn(Optional.of(URL)).thenReturn(Optional.empty());
         when(brain.isFinishedLoading(anyString(), anyString())).thenReturn(true);
         defaultScraper.run();
         ArgumentCaptor<Long> longCaptor = ArgumentCaptor.forClass(Long.class);
@@ -66,9 +62,7 @@ public final class PoliteScraperTest {
         when(timeProvider.currentTimeMillis())
                 .thenReturn(0L)
                 .thenReturn(1L);
-        when(brain.hasNext()).thenReturn(true).thenReturn(false);
-        when(brain.nextUrl()).thenReturn(Optional.of(URL));
-        when(cache.get(anyString())).thenReturn(Optional.empty());
+        when(brain.nextUrl()).thenReturn(Optional.of(URL)).thenReturn(Optional.empty());
         when(brain.isFinishedLoading(anyString(), anyString())).thenReturn(true);
         defaultScraper.run();
         ArgumentCaptor<Long> longCaptor = ArgumentCaptor.forClass(Long.class);
@@ -81,9 +75,7 @@ public final class PoliteScraperTest {
         when(timeProvider.currentTimeMillis())
                 .thenReturn(0L)
                 .thenReturn(1L);
-        when(brain.hasNext()).thenReturn(true).thenReturn(false);
-        when(brain.nextUrl()).thenReturn(Optional.of(URL));
-        when(cache.get(anyString())).thenReturn(Optional.empty());
+        when(brain.nextUrl()).thenReturn(Optional.of(URL)).thenReturn(Optional.empty());
         when(brain.isFinishedLoading(anyString(), anyString())).thenReturn(false).thenReturn(true);
         defaultScraper.run();
         ArgumentCaptor<Long> longCaptor = ArgumentCaptor.forClass(Long.class);
@@ -99,9 +91,7 @@ public final class PoliteScraperTest {
                 .thenReturn(0L) // Getting time between calls
                 .thenReturn(1L) // Last request
                 .thenReturn(DEFAULT_MAX_WAIT_LOAD + 10);
-        when(brain.hasNext()).thenReturn(true).thenReturn(false);
-        when(brain.nextUrl()).thenReturn(Optional.of(URL));
-        when(cache.get(anyString())).thenReturn(Optional.empty());
+        when(brain.nextUrl()).thenReturn(Optional.of(URL)).thenReturn(Optional.empty());
         when(brain.isFinishedLoading(anyString(), anyString())).thenReturn(false);
         defaultScraper.run();
         ArgumentCaptor<Long> longCaptor = ArgumentCaptor.forClass(Long.class);
