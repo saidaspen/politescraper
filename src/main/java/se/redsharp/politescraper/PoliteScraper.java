@@ -47,7 +47,7 @@ public final class PoliteScraper {
     @SuppressWarnings({"unused", "WeakerAccess"})
     public static final class PoliteScraperBuilder {
 
-        private final WebDriver driver;
+        private final WebDriver webDriver;
         private final PageBrain brain;
         private TimeProvider timeProvider;
         private long backOffMillis = DEFAULT_BACK_OFF_SECONDS;
@@ -58,12 +58,12 @@ public final class PoliteScraper {
         private long maxWaitLoad = DEFAULT_MAX_WAIT_LOAD;
         private long stdDevWaitBetween = DEFAULT_STD_DEV_WAIT_BETWEEN;
 
-        public PoliteScraperBuilder(final WebDriver driver, final PageBrain brain) {
-            this.driver = driver;
+        public PoliteScraperBuilder(WebDriver webDriver, PageBrain brain) {
+            this.webDriver = webDriver;
             this.brain = brain;
         }
 
-        public PoliteScraperBuilder timeProvider(final TimeProvider timeProvider) {
+        public PoliteScraperBuilder timeProvider(TimeProvider timeProvider) {
             this.timeProvider = timeProvider;
             return this;
         }
@@ -124,8 +124,8 @@ public final class PoliteScraper {
         }
     }
 
-    private PoliteScraper(final PoliteScraperBuilder builder) {
-        driver = builder.driver;
+    private PoliteScraper(PoliteScraperBuilder builder) {
+        driver = builder.webDriver;
         timeProvider = builder.timeProvider;
         brain = builder.brain;
         originalBackOfMillis = builder.backOffMillis;
@@ -144,7 +144,8 @@ public final class PoliteScraper {
         Optional<String> url = brain.nextUrl();
         while (url.isPresent()) {
             try {
-                brain.notifyDone(url.get(), pageOf(url.get()));
+                String html = pageOf(url.get());
+                brain.notifyDone(url.get(), html);
             } catch (ScrapingException e) {
                 brain.handleError(url.get(), e.getMessage());
             }
@@ -167,7 +168,7 @@ public final class PoliteScraper {
             backOffMillis = backOffMillis < maxBackOffMillis ? newBackOff() : maxBackOffMillis;
             log.warn(MSG_BACKING_OFF, backOffMillis / MS_IN_MIN);
             timeProvider.sleep(backOffMillis);
-        } catch (final InterruptedException e) {
+        } catch (InterruptedException e) {
             throw new ScrapingException(MSG_INTERRUPTED_FROM_SLEEP, e);
         }
     }
@@ -176,10 +177,10 @@ public final class PoliteScraper {
         return (int) (2 * backOffMillis + backOffMillis * rand.nextGaussian());
     }
 
-    private String scrape(final String url) throws ScrapingException {
+    private String scrape(String url) throws ScrapingException {
         try {
-            final long waitBetweenCalls = (long) (Math.abs(rand.nextGaussian() * stdDevWaitBetween) + minWaitBetween);
-            long waitFor = lastRequest + waitBetweenCalls - timeProvider.currentTimeMillis();
+            long waitBetweenCalls = (long) (Math.abs(rand.nextGaussian() * stdDevWaitBetween) + minWaitBetween);
+            long waitFor = Math.max(minWaitBetween, lastRequest + waitBetweenCalls - timeProvider.currentTimeMillis());
             if (waitFor > 0) {
                 log.info(MSG_WAIT_BETWEEN_CALLS, waitFor / 1000);
                 timeProvider.sleep(waitFor);
@@ -188,7 +189,7 @@ public final class PoliteScraper {
             lastRequest = timeProvider.currentTimeMillis();
             driver.get(url);
             return waitForPageLoad();
-        } catch (final InterruptedException e) {
+        } catch (InterruptedException e) {
             throw new ScrapingException(MSG_INTERRUPTED_FROM_SLEEP, e);
         }
     }
@@ -196,8 +197,8 @@ public final class PoliteScraper {
     private String waitForPageLoad() throws InterruptedException, ScrapingException {
         log.debug(MSG_WAIT_PAGE_LOAD);
         timeProvider.sleep(waitLoad);
-        final String html = driver.getPageSource();
-        final long currentTime = timeProvider.currentTimeMillis();
+        String html = driver.getPageSource();
+        long currentTime = timeProvider.currentTimeMillis();
         boolean timeOut = currentTime > lastRequest + maxWaitLoad;
         if (brain.isFinishedLoading(driver.getCurrentUrl(), html)) {
             return html;
@@ -209,7 +210,7 @@ public final class PoliteScraper {
         }
     }
 
-    private boolean isEmpty(final String str) {
+    private boolean isEmpty(String str) {
         return str == null || str.trim().isEmpty();
     }
 

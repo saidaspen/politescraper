@@ -39,7 +39,8 @@ public final class PoliteScraperTest {
 
     @Test
     public void pageAlreadyInCache() throws Exception {
-        when(brain.nextUrl()).thenReturn(Optional.of(URL));
+        when(brain.nextUrl()).thenReturn(Optional.of(URL)).thenReturn(Optional.empty());
+        when(brain.isFinishedLoading(anyString(), anyString())).thenReturn(true);
         defaultScraper.run();
         verify(brain, times(1)).notifyDone(URL, SOURCE);
     }

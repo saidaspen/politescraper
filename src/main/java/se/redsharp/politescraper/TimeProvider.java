@@ -1,6 +1,6 @@
 package se.redsharp.politescraper;
 
-public interface TimeProvider {
+interface TimeProvider {
 
     long currentTimeMillis();
 

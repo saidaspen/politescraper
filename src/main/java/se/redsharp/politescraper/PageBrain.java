@@ -29,13 +29,13 @@ public interface PageBrain {
     Optional<String> nextUrl();
 
     /**
-     * Method which the {@link PageBrain} uses to inform the scraper if the html-page in question is fully loaded.
+     * Method which the  uses to inform the scraper if the html-page in question is fully loaded.
      * <p>
      * Many times the data received for web-pages is sent asynchronously. This is often controlled by Java-scripts which
      * requests data in several batches from the server. Therefore at any given point the page might or might not be
      * fully loaded.
      * The engine for scraping the web-pages, does not know any specifics of the pages being scraped so it is up to the
-     * {@link PageBrain} to be able to tell the scraper if the page is fully loaded or not.
+     *  to be able to tell the scraper if the page is fully loaded or not.
      *
      * @param url  the URL which has been scraped in order to produce the html
      * @param html the full string representation of the web-page. Might or might not be fully loaded.
@@ -44,21 +44,21 @@ public interface PageBrain {
     boolean isFinishedLoading(String url, String html);
 
     /**
-     * Method which the {@link PageBrain} uses to inform the scraper if the html-page returned is wrong.
+     * Method which the  uses to inform the scraper if the html-page returned is wrong.
      * This can happen if the site which is being scraped returns some other page, a 404 or a Request Rejected page
      * because it has been hit too hard with scraping or for some other reason.
      * <p>
      * When this happens the scraper will try to back-off. To wait a longer amount of time before returning to scraping.
      *
-     * @param scrapedHtml
-     * @return
+     * @param scrapedHtml is the full html of the page which has been scraped. Should be used to determine if back off is necessary.
+     * @return true if back-off is necessary
      */
     boolean shouldBackOffAndRetry(String scrapedHtml);
 
     /**
-     * Call back done by scraper to inform the {@link PageBrain} that a certain page is now handled.
+     * Call back done by scraper to inform the  that a certain page is now handled.
      * <p>
-     * Normally what happens in the {@link PageBrain} at this point is to remove the url as handled in its internal
+     * Normally what happens in the  at this point is to remove the url as handled in its internal
      * queue (or mark it as handled in some way). Parse the actual web-page being returned and update the queue of urls
      * to be parsed with any links found that it should follow up on.
      *
@@ -68,8 +68,8 @@ public interface PageBrain {
     void notifyDone(String url, String html);
 
     /**
-     * Method used by the scraper to inform the {@link PageBrain} that something has gone wrong.
-     * The {@link PageBrain} can then decide what to do. Log it and keep going or stop processing altogether.
+     * Method used by the scraper to inform the  that something has gone wrong.
+     * The  can then decide what to do. Log it and keep going or stop processing altogether.
      *
      * @param url     the url being scraped at the time of the error.
      * @param message string representation of the underlying exception.
