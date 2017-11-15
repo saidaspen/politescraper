@@ -5,7 +5,6 @@ import java.util.*;
 import org.apache.logging.log4j.*;
 import org.openqa.selenium.*;
 
-@SuppressWarnings({"unused", "WeakerAccess"})
 public final class PoliteScraper {
 
     /**
@@ -15,11 +14,17 @@ public final class PoliteScraper {
     private static final int MS_PER_SECOND = 1000;
     private static final int MS_IN_MIN = MS_PER_SECOND * SECONDS_PER_MINUTE;
 
+    @SuppressWarnings("WeakerAccess")
     public static final long DEFAULT_BACK_OFF_SECONDS = 2 * MS_IN_MIN;
+    @SuppressWarnings("WeakerAccess")
     public static final long DEFAULT_MAX_BACK_OFF_SECONDS = 20 * MS_IN_MIN;
+    @SuppressWarnings("WeakerAccess")
     public static final long DEFAULT_WAIT_LOAD = 5 * MS_PER_SECOND;
+    @SuppressWarnings("WeakerAccess")
     public static final long DEFAULT_MAX_WAIT_LOAD = 10 * DEFAULT_WAIT_LOAD;
+    @SuppressWarnings("WeakerAccess")
     public static final long DEFAULT_MIN_WAIT_BETWEEN = 10 * MS_PER_SECOND;
+    @SuppressWarnings("WeakerAccess")
     public static final long DEFAULT_STD_DEV_WAIT_BETWEEN = 2 * DEFAULT_WAIT_LOAD;
 
     private static final String MSG_BACKING_OFF = "Backing off {} minutes.";
@@ -195,10 +200,6 @@ public final class PoliteScraper {
             log.warn(MSG_PAGE_NOT_FINISHED);
             return waitForPageLoad();
         }
-    }
-
-    private boolean isEmpty(String str) {
-        return str == null || str.trim().isEmpty();
     }
 
 }

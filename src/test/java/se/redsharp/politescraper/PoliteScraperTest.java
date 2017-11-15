@@ -47,28 +47,66 @@ public final class PoliteScraperTest {
 
     @Test
     public void defaultMinmumWaitBetweenCalls() throws Exception {
+        testMinWaitBetween(defaultScraper, DEFAULT_MIN_WAIT_BETWEEN);
+    }
+
+    @Test
+    public void configureableMinWaitBetween() throws Exception {
+        PoliteScraper scraper = new PoliteScraperBuilder(driver, brain)
+                .seed(SEED)
+                .timeProvider(timeProvider)
+                .minWaitBetween(9).build();
+        testMinWaitBetween(scraper, 9 * 1000L);
+    }
+
+    @Test
+    public void configureableStdWaitBetween() throws Exception {
+        PoliteScraper scraper = new PoliteScraperBuilder(driver, brain)
+                .seed(SEED)
+                .timeProvider(timeProvider)
+                .stdDevWaitBetween(100)
+                .minWaitBetween(1).build();
+        // 46998L is gotten by using the random function with the given seed.
+        testMinWaitBetween(scraper, 46998L - 1);
+    }
+
+    private void testMinWaitBetween(PoliteScraper scraper, long minWait) throws InterruptedException {
         when(timeProvider.currentTimeMillis())
                 .thenReturn(0L)
                 .thenReturn(1L);
         when(brain.nextUrl()).thenReturn(Optional.of(URL)).thenReturn(Optional.empty());
         when(brain.isFinishedLoading(anyString(), anyString())).thenReturn(true);
-        defaultScraper.run();
+        scraper.run();
         ArgumentCaptor<Long> longCaptor = ArgumentCaptor.forClass(Long.class);
         verify(timeProvider, atLeastOnce()).sleep(longCaptor.capture());
-        assertThat(longCaptor.getAllValues().get(0), is(greaterThan(PoliteScraper.DEFAULT_MIN_WAIT_BETWEEN)));
+        assertThat(longCaptor.getAllValues().get(0), is(greaterThan(minWait)));
     }
 
     @Test
     public void defaultWaitPageLoad() throws Exception {
+        testWaitLoad(defaultScraper, DEFAULT_WAIT_LOAD);
+    }
+
+    @Test
+    public void configureableWaitLoad() throws Exception {
+        PoliteScraper scraper = new PoliteScraperBuilder(driver, brain)
+                .seed(SEED)
+                .timeProvider(timeProvider)
+                .waitLoad(5)
+                .build();
+        testWaitLoad(scraper, 5 * 1000L);
+    }
+
+    private void testWaitLoad(PoliteScraper scraper, long expectedWaitLoad) throws InterruptedException {
         when(timeProvider.currentTimeMillis())
                 .thenReturn(0L)
                 .thenReturn(1L);
         when(brain.nextUrl()).thenReturn(Optional.of(URL)).thenReturn(Optional.empty());
         when(brain.isFinishedLoading(anyString(), anyString())).thenReturn(true);
-        defaultScraper.run();
+        scraper.run();
         ArgumentCaptor<Long> longCaptor = ArgumentCaptor.forClass(Long.class);
         verify(timeProvider, atLeastOnce()).sleep(longCaptor.capture());
-        assertThat(longCaptor.getAllValues().get(1), is(equalTo(PoliteScraper.DEFAULT_WAIT_LOAD)));
+        assertThat(longCaptor.getAllValues().get(1), is(equalTo(expectedWaitLoad)));
     }
 
     @Test
@@ -82,24 +120,80 @@ public final class PoliteScraperTest {
         ArgumentCaptor<Long> longCaptor = ArgumentCaptor.forClass(Long.class);
         verify(timeProvider, atLeastOnce()).sleep(longCaptor.capture());
         List<Long> sleepValues = longCaptor.getAllValues();
-        assertThat(sleepValues.get(0), is(greaterThan(PoliteScraper.DEFAULT_MIN_WAIT_BETWEEN)));
-        assertThat(sleepValues.get(1), is(equalTo(PoliteScraper.DEFAULT_WAIT_LOAD)));
+        assertThat(sleepValues.get(0), is(greaterThan(DEFAULT_MIN_WAIT_BETWEEN)));
+        assertThat(sleepValues.get(1), is(equalTo(DEFAULT_WAIT_LOAD)));
     }
 
     @Test
     public void timesOutAfterMaxWait() throws Exception {
+        testTimeout(defaultScraper, DEFAULT_MAX_WAIT_LOAD);
+    }
+
+    @Test
+    public void configureableTimeout() throws Exception {
+        PoliteScraper scraper = new PoliteScraperBuilder(driver, brain)
+                .seed(SEED)
+                .timeProvider(timeProvider)
+                .maxWaitLoad(9)
+                .build();
+        testTimeout(scraper, 9 * 1000);
+    }
+
+    private void testTimeout(PoliteScraper scraper, long timeout) throws InterruptedException {
         when(timeProvider.currentTimeMillis())
                 .thenReturn(0L) // Getting time between calls
                 .thenReturn(1L) // Last request
-                .thenReturn(DEFAULT_MAX_WAIT_LOAD + 10);
+                .thenReturn(timeout + 10);
         when(brain.nextUrl()).thenReturn(Optional.of(URL)).thenReturn(Optional.empty());
         when(brain.isFinishedLoading(anyString(), anyString())).thenReturn(false);
-        defaultScraper.run();
+        scraper.run();
         ArgumentCaptor<Long> longCaptor = ArgumentCaptor.forClass(Long.class);
         verify(timeProvider, atLeastOnce()).sleep(longCaptor.capture());
         List<Long> sleepValues = longCaptor.getAllValues();
-        assertThat(sleepValues.get(0), is(greaterThan(PoliteScraper.DEFAULT_MIN_WAIT_BETWEEN)));
-        assertThat(sleepValues.get(1), is(equalTo(PoliteScraper.DEFAULT_WAIT_LOAD)));
-        verify(brain).handleError(URL, "URL '" + URL + "' timed out after 50000 seconds.");
+        assertThat(sleepValues.get(0), is(greaterThan(DEFAULT_MIN_WAIT_BETWEEN)));
+        assertThat(sleepValues.get(1), is(equalTo(DEFAULT_WAIT_LOAD)));
+        verify(brain).handleError(URL, "URL '" + URL + "' timed out after " + timeout + " seconds.");
+    }
+
+    @Test
+    void defaultBackOff() throws InterruptedException {
+        testBackOff(defaultScraper, DEFAULT_BACK_OFF_SECONDS);
+    }
+
+    @Test
+    void configureableBackOff() throws InterruptedException {
+        PoliteScraper scraper = new PoliteScraperBuilder(driver, brain)
+                .seed(SEED)
+                .timeProvider(timeProvider)
+                .backOffSeconds(9).build();
+        testBackOff(scraper, 9 * 1000);
+    }
+
+    @Test
+    void configureableMaxBackOff() throws InterruptedException {
+        PoliteScraper scraper = new PoliteScraperBuilder(driver, brain)
+                .seed(SEED)
+                .timeProvider(timeProvider)
+                .backOffSeconds(10)
+                .maxBackOff(6).build();
+        testBackOff(scraper, 5 * 1000);
+    }
+
+    private void testBackOff(PoliteScraper scraper, long backOffSeconds) throws InterruptedException {
+        when(timeProvider.currentTimeMillis())
+                .thenReturn(0L) // Getting time between calls
+                .thenReturn(1L); // Last request
+        when(brain.nextUrl()).thenReturn(Optional.of(URL)).thenReturn(Optional.empty());
+        when(brain.isFinishedLoading(anyString(), anyString())).thenReturn(true);
+        when(brain.shouldBackOffAndRetry(anyString())).thenReturn(true).thenReturn(false);
+        scraper.run();
+        ArgumentCaptor<Long> longCaptor = ArgumentCaptor.forClass(Long.class);
+        verify(timeProvider, atLeastOnce()).sleep(longCaptor.capture());
+        List<Long> sleepValues = longCaptor.getAllValues();
+        assertThat(sleepValues.get(0), is(greaterThan(DEFAULT_MIN_WAIT_BETWEEN)));
+        assertThat(sleepValues.get(1), is(equalTo(DEFAULT_WAIT_LOAD)));
+        assertThat(sleepValues.get(2), is(greaterThan(backOffSeconds)));
+        assertThat(sleepValues.get(3), is(greaterThan(DEFAULT_MIN_WAIT_BETWEEN)));
+        assertThat(sleepValues.get(4), is(equalTo(DEFAULT_WAIT_LOAD)));
     }
 }
