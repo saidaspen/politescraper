@@ -2,13 +2,13 @@ package se.redsharp.politescraper;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 import static se.redsharp.politescraper.PoliteScraper.*;
 
 import java.util.*;
-import org.junit.*;
+import org.junit.jupiter.api.*;
 import org.mockito.*;
 import org.openqa.selenium.*;
 import se.redsharp.politescraper.PoliteScraper.*;
@@ -23,7 +23,7 @@ public final class PoliteScraperTest {
     private final TimeProvider timeProvider = mock(TimeProvider.class);
     private final PoliteScraper defaultScraper = new PoliteScraperBuilder(driver, brain).seed(SEED).timeProvider(timeProvider).build();
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         when(driver.getCurrentUrl()).thenReturn(URL);
         when(driver.getPageSource()).thenReturn(SOURCE);

@@ -111,19 +111,6 @@ public final class PoliteScraper {
         }
     }
 
-    private static final class DefaultTimeProvider implements TimeProvider {
-
-        @Override
-        public long currentTimeMillis() {
-            return System.currentTimeMillis();
-        }
-
-        @Override
-        public void sleep(long millis) throws InterruptedException {
-            Thread.sleep(millis);
-        }
-    }
-
     private PoliteScraper(PoliteScraperBuilder builder) {
         driver = builder.webDriver;
         timeProvider = builder.timeProvider;

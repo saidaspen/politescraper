@@ -3,15 +3,15 @@ package se.redsharp.politescraper;
 /**
  *  Exception type to encapsulate any kind of error happening during scraping.
  */
-class ScrapingException extends Exception {
+public class ScrapingException extends Exception {
 
     private static final long serialVersionUID = 5843098092228540344L;
 
-    ScrapingException(String msg, Exception cause) {
+    public ScrapingException(String msg, Exception cause) {
         super(msg, cause);
     }
 
-    ScrapingException(String msg) {
+    public ScrapingException(String msg) {
         super(msg);
     }
 }
