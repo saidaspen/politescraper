@@ -4,6 +4,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 import static se.redsharp.politescraper.PoliteScraper.*;
 
@@ -156,12 +157,12 @@ public final class PoliteScraperTest {
     }
 
     @Test
-    void defaultBackOff() throws InterruptedException {
+    void defaultBackOff() throws Exception {
         testBackOff(defaultScraper, DEFAULT_BACK_OFF_SECONDS);
     }
 
     @Test
-    void configureableBackOff() throws InterruptedException {
+    void configureableBackOff() throws Exception {
         PoliteScraper scraper = new PoliteScraperBuilder(driver, brain)
                 .seed(SEED)
                 .timeProvider(timeProvider)
@@ -170,7 +171,7 @@ public final class PoliteScraperTest {
     }
 
     @Test
-    void configureableMaxBackOff() throws InterruptedException {
+    void configureableMaxBackOff() throws Exception {
         PoliteScraper scraper = new PoliteScraperBuilder(driver, brain)
                 .seed(SEED)
                 .timeProvider(timeProvider)
@@ -179,7 +180,21 @@ public final class PoliteScraperTest {
         testBackOff(scraper, 5 * 1000);
     }
 
-    private void testBackOff(PoliteScraper scraper, long backOffSeconds) throws InterruptedException {
+    @Test
+    void handlesErrorOnUnderlyingInterruption() throws InterruptedException {
+        when(timeProvider.currentTimeMillis())
+                .thenReturn(0L) // Getting time between calls
+                .thenReturn(1L); // Last request
+        doThrow(new InterruptedException("some exception msg")).when(timeProvider).sleep(anyLong());
+        when(brain.nextUrl()).thenReturn(Optional.of(URL)).thenReturn(Optional.of(URL)).thenReturn(Optional.empty());
+        when(brain.isFinishedLoading(anyString(), anyString())).thenReturn(true);
+        when(brain.shouldBackOffAndRetry(anyString())).thenReturn(true).thenReturn(false);
+        defaultScraper.run();
+        verify(brain, atLeastOnce()).handleError(URL, "Unexpectedly interrupted from sleep");
+
+    }
+
+    private void testBackOff(PoliteScraper scraper, long backOffSeconds) throws Exception {
         when(timeProvider.currentTimeMillis())
                 .thenReturn(0L) // Getting time between calls
                 .thenReturn(1L); // Last request
