@@ -4,7 +4,6 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 import static se.redsharp.politescraper.PoliteScraper.*;
 
@@ -191,7 +190,39 @@ public final class PoliteScraperTest {
         when(brain.shouldBackOffAndRetry(anyString())).thenReturn(true).thenReturn(false);
         defaultScraper.run();
         verify(brain, atLeastOnce()).handleError(URL, "Unexpectedly interrupted from sleep");
+    }
 
+    @Test
+    void handlesErrorOnUnderlyingBackOffInterruption() throws InterruptedException {
+        when(timeProvider.currentTimeMillis()).thenReturn(0L).thenReturn(1L);
+        doNothing().doNothing().doThrow(new InterruptedException("some exception msg")).when(timeProvider).sleep(anyLong());
+        when(brain.nextUrl()).thenReturn(Optional.of(URL)).thenReturn(Optional.empty());
+        when(brain.isFinishedLoading(anyString(), anyString())).thenReturn(true);
+        when(brain.shouldBackOffAndRetry(anyString())).thenReturn(true).thenReturn(false);
+        defaultScraper.run();
+        ArgumentCaptor<Long> longCaptor = ArgumentCaptor.forClass(Long.class);
+        verify(timeProvider, atLeastOnce()).sleep(longCaptor.capture());
+        verify(brain, atLeastOnce()).handleError(URL, "Unexpectedly interrupted from sleep");
+    }
+
+    @Test
+    void buildDefaultTimeProvider() {
+        Integer minWait = 1;
+        PoliteScraper scraper = new PoliteScraperBuilder(driver, brain)
+                .seed(SEED)
+                .minWaitBetween(minWait)
+                .stdDevWaitBetween(0)
+                .waitLoad(0)
+                .maxWaitLoad(1)
+                .build();
+        when(brain.nextUrl()).thenReturn(Optional.of(URL)).thenReturn(Optional.empty());
+        when(brain.isFinishedLoading(anyString(), anyString())).thenReturn(true);
+        long timeBefore = System.currentTimeMillis();
+        scraper.run();
+        long timeAfter = System.currentTimeMillis();
+        assertThat(timeAfter - timeBefore, is(greaterThanOrEqualTo(minWait * 1000L)));
+        assertThat(timeAfter - timeBefore, is(lessThanOrEqualTo(2 * minWait * 1000L)));
+        verify(brain, times(1)).notifyDone(URL, SOURCE);
     }
 
     private void testBackOff(PoliteScraper scraper, long backOffSeconds) throws Exception {
