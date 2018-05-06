@@ -1,5 +1,8 @@
 package se.redsharp.politescraper;
 
+/**
+ * Simple facade over the Systems own time providing methods.
+ */
 public final class DefaultTimeProvider implements TimeProvider {
 
     @Override

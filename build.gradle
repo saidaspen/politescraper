@@ -3,19 +3,19 @@ version '1.0-SNAPSHOT'
 
 apply plugin: 'java'
 
-sourceCompatibility = 1.8
+sourceCompatibility = 1.9
 
 repositories {
     mavenCentral()
 }
 
 dependencies {
-    compile group: 'com.codeborne', name: 'phantomjsdriver', version: '1.2.1'
-    compile group: 'org.seleniumhq.selenium', name: 'selenium-java', version: '2.53.1'
-    compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.8.2'
-    compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.8.2'
+    compile group: 'com.codeborne', name: 'phantomjsdriver', version: '1.4.4'
+    compile group: 'org.seleniumhq.selenium', name: 'selenium-java', version: '3.11.0'
+    compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.11.0'
+    compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.11.0'
 
-    testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.0.2'
+    testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.2.0'
     testCompile group: 'org.hamcrest', name: 'java-hamcrest', version: '2.0.0.0'
-    testCompile 'org.mockito:mockito-core:2.8.47'
+    testCompile 'org.mockito:mockito-core:2.18.3'
 }

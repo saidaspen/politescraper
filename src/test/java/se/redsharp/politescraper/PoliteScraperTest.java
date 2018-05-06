@@ -67,7 +67,7 @@ public final class PoliteScraperTest {
                 .stdDevWaitBetween(100)
                 .minWaitBetween(1).build();
         // 46998L is gotten by using the random function with the given seed.
-        testMinWaitBetween(scraper, 46998L - 1);
+        testMinWaitBetween(scraper, 34676L - 1);
     }
 
     private void testMinWaitBetween(PoliteScraper scraper, long minWait) throws InterruptedException {
@@ -163,7 +163,6 @@ public final class PoliteScraperTest {
     @Test
     void configureableBackOff() throws Exception {
         PoliteScraper scraper = new PoliteScraperBuilder(driver, brain)
-                .seed(SEED)
                 .timeProvider(timeProvider)
                 .backOffSeconds(9).build();
         testBackOff(scraper, 9 * 1000);
