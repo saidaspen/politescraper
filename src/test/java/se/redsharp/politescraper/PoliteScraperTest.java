@@ -237,7 +237,7 @@ public final class PoliteScraperTest {
         List<Long> sleepValues = longCaptor.getAllValues();
         assertThat(sleepValues.get(0), is(greaterThan(DEFAULT_MIN_WAIT_BETWEEN)));
         assertThat(sleepValues.get(1), is(equalTo(DEFAULT_WAIT_LOAD)));
-        assertThat(sleepValues.get(2), is(greaterThan(backOffSeconds)));
+        assertThat(sleepValues.get(2), is(greaterThan(backOffSeconds - DEFAULT_WAIT_LOAD)));
         assertThat(sleepValues.get(3), is(greaterThan(DEFAULT_MIN_WAIT_BETWEEN)));
         assertThat(sleepValues.get(4), is(equalTo(DEFAULT_WAIT_LOAD)));
     }
