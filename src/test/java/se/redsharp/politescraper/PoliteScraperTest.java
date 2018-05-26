@@ -1,36 +1,44 @@
 package se.redsharp.politescraper;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.openqa.selenium.WebDriver;
+import se.redsharp.politescraper.PoliteScraper.*;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.Random;
+
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.mockito.Mockito.*;
 import static se.redsharp.politescraper.PoliteScraper.*;
 
-import java.util.*;
-import org.junit.jupiter.api.*;
-import org.mockito.*;
-import org.openqa.selenium.*;
-import se.redsharp.politescraper.PoliteScraper.*;
+final class PoliteScraperTest {
 
-public final class PoliteScraperTest {
-
-    private static final int SEED = 42;
     private static final String URL = "not really an url";
     private static final String SOURCE = "some page source";
     private final PageBrain brain = mock(PageBrain.class);
     private final WebDriver driver = mock(WebDriver.class);
     private final TimeProvider timeProvider = mock(TimeProvider.class);
-    private final PoliteScraper defaultScraper = new PoliteScraperBuilder(driver, brain).seed(SEED).timeProvider(timeProvider).build();
+    private final Random rand = mock(Random.class);
+    private final PoliteScraper defaultScraper = new PoliteScraperBuilder(driver, brain)
+            .random(rand)
+            .timeProvider(timeProvider)
+            .build();
 
     @BeforeEach
-    public void setUp() throws Exception {
+    void setUp() {
+        when(rand.nextGaussian()).thenReturn(1.0).thenReturn(1.0);
         when(driver.getCurrentUrl()).thenReturn(URL);
         when(driver.getPageSource()).thenReturn(SOURCE);
     }
 
     @Test
-    public void returnsIfDoesNotHaveUrls() throws Exception {
+    void returnsIfDoesNotHaveUrls() {
         when(brain.nextUrl()).thenReturn(Optional.empty());
         defaultScraper.run();
         verify(brain, atMost(1)).nextUrl();
@@ -38,7 +46,7 @@ public final class PoliteScraperTest {
     }
 
     @Test
-    public void pageAlreadyInCache() throws Exception {
+    void pageAlreadyInCache() {
         when(brain.nextUrl()).thenReturn(Optional.of(URL)).thenReturn(Optional.empty());
         when(brain.isFinishedLoading(anyString(), anyString())).thenReturn(true);
         defaultScraper.run();
@@ -46,27 +54,27 @@ public final class PoliteScraperTest {
     }
 
     @Test
-    public void defaultMinmumWaitBetweenCalls() throws Exception {
+    void defaultMinimumWaitBetweenCalls() throws Exception {
         testMinWaitBetween(defaultScraper, DEFAULT_MIN_WAIT_BETWEEN);
     }
 
     @Test
-    public void configureableMinWaitBetween() throws Exception {
+    void configurableMinWaitBetween() throws Exception {
         PoliteScraper scraper = new PoliteScraperBuilder(driver, brain)
-                .seed(SEED)
+                .random(rand)
                 .timeProvider(timeProvider)
-                .minWaitBetween(9).build();
+                .minWaitBetween(9)
+                .build();
         testMinWaitBetween(scraper, 9 * 1000L);
     }
 
     @Test
-    public void configureableStdWaitBetween() throws Exception {
+    void configurableStdWaitBetween() throws Exception {
         PoliteScraper scraper = new PoliteScraperBuilder(driver, brain)
-                .seed(SEED)
+                .random(rand)
                 .timeProvider(timeProvider)
                 .stdDevWaitBetween(100)
                 .minWaitBetween(1).build();
-        // 46998L is gotten by using the random function with the given seed.
         testMinWaitBetween(scraper, 34676L - 1);
     }
 
@@ -83,14 +91,14 @@ public final class PoliteScraperTest {
     }
 
     @Test
-    public void defaultWaitPageLoad() throws Exception {
+    void defaultWaitPageLoad() throws Exception {
         testWaitLoad(defaultScraper, DEFAULT_WAIT_LOAD);
     }
 
     @Test
-    public void configureableWaitLoad() throws Exception {
+    void configurableWaitLoad() throws Exception {
         PoliteScraper scraper = new PoliteScraperBuilder(driver, brain)
-                .seed(SEED)
+                .random(rand)
                 .timeProvider(timeProvider)
                 .waitLoad(5)
                 .build();
@@ -110,7 +118,7 @@ public final class PoliteScraperTest {
     }
 
     @Test
-    public void waitsUntilPageFullyLoaded() throws Exception {
+    void waitsUntilPageFullyLoaded() throws Exception {
         when(timeProvider.currentTimeMillis())
                 .thenReturn(0L)
                 .thenReturn(1L);
@@ -125,14 +133,14 @@ public final class PoliteScraperTest {
     }
 
     @Test
-    public void timesOutAfterMaxWait() throws Exception {
+    void timesOutAfterMaxWait() throws Exception {
         testTimeout(defaultScraper, DEFAULT_MAX_WAIT_LOAD);
     }
 
     @Test
-    public void configureableTimeout() throws Exception {
+    void configurableTimeout() throws Exception {
         PoliteScraper scraper = new PoliteScraperBuilder(driver, brain)
-                .seed(SEED)
+                .random(rand)
                 .timeProvider(timeProvider)
                 .maxWaitLoad(9)
                 .build();
@@ -161,17 +169,18 @@ public final class PoliteScraperTest {
     }
 
     @Test
-    void configureableBackOff() throws Exception {
+    void configurableBackOff() throws Exception {
         PoliteScraper scraper = new PoliteScraperBuilder(driver, brain)
+                .random(rand)
                 .timeProvider(timeProvider)
                 .backOffSeconds(9).build();
         testBackOff(scraper, 9 * 1000);
     }
 
     @Test
-    void configureableMaxBackOff() throws Exception {
+    void configurableMaxBackOff() throws Exception {
         PoliteScraper scraper = new PoliteScraperBuilder(driver, brain)
-                .seed(SEED)
+                .random(rand)
                 .timeProvider(timeProvider)
                 .backOffSeconds(10)
                 .maxBackOff(6).build();
@@ -208,7 +217,7 @@ public final class PoliteScraperTest {
     void buildDefaultTimeProvider() {
         Integer minWait = 1;
         PoliteScraper scraper = new PoliteScraperBuilder(driver, brain)
-                .seed(SEED)
+                .random(rand)
                 .minWaitBetween(minWait)
                 .stdDevWaitBetween(0)
                 .waitLoad(0)

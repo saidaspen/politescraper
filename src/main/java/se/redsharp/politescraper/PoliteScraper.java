@@ -1,9 +1,12 @@
 package se.redsharp.politescraper;
 
-import java.security.*;
-import java.util.*;
-import org.apache.logging.log4j.*;
-import org.openqa.selenium.*;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.openqa.selenium.WebDriver;
+
+import java.security.SecureRandom;
+import java.util.Optional;
+import java.util.Random;
 
 public final class PoliteScraper {
 
@@ -36,7 +39,7 @@ public final class PoliteScraper {
     private final WebDriver driver;
     private final TimeProvider timeProvider;
     private final PageBrain brain;
-    private final Random rand = new SecureRandom();
+    private final Random rand;
 
     private final long minWaitBetween;
     private final long originalBackOfMillis;
@@ -56,12 +59,12 @@ public final class PoliteScraper {
         private final PageBrain brain;
         private TimeProvider timeProvider;
         private long backOffMillis = DEFAULT_BACK_OFF_SECONDS;
-        private long seed = System.nanoTime();
-        private long maxBackoff = DEFAULT_MAX_BACK_OFF_SECONDS;
+        private long maxBackOff = DEFAULT_MAX_BACK_OFF_SECONDS;
         private long minWaitBetween = DEFAULT_MIN_WAIT_BETWEEN;
         private long waitLoad = DEFAULT_WAIT_LOAD;
         private long maxWaitLoad = DEFAULT_MAX_WAIT_LOAD;
         private long stdDevWaitBetween = DEFAULT_STD_DEV_WAIT_BETWEEN;
+        private Random rand = new SecureRandom();
 
         public PoliteScraperBuilder(WebDriver webDriver, PageBrain brain) {
             this.webDriver = webDriver;
@@ -89,7 +92,7 @@ public final class PoliteScraper {
         }
 
         public PoliteScraperBuilder maxBackOff(int seconds) {
-            maxBackoff = (long) seconds * MS_PER_SECOND;
+            maxBackOff = (long) seconds * MS_PER_SECOND;
             return this;
         }
 
@@ -103,8 +106,8 @@ public final class PoliteScraper {
             return this;
         }
 
-        public PoliteScraperBuilder seed(long seed) {
-            this.seed = seed;
+        public PoliteScraperBuilder random(Random rand) {
+            this.rand = rand;
             return this;
         }
 
@@ -121,15 +124,15 @@ public final class PoliteScraper {
         timeProvider = builder.timeProvider;
         brain = builder.brain;
         originalBackOfMillis = builder.backOffMillis;
-        maxBackOffMillis = builder.maxBackoff;
+        maxBackOffMillis = builder.maxBackOff;
         minWaitBetween = builder.minWaitBetween;
         waitLoad = builder.waitLoad;
         maxWaitLoad = builder.maxWaitLoad;
         stdDevWaitBetween = builder.stdDevWaitBetween;
         lastRequest = timeProvider.currentTimeMillis();
+        rand = builder.rand;
         backOffMillis = originalBackOfMillis;
         log = LogManager.getLogger(getClass().getSimpleName());
-        rand.setSeed(builder.seed);
     }
 
     public void run() {
