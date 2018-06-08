@@ -4,7 +4,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.openqa.selenium.WebDriver;
-import se.redsharp.politescraper.PoliteScraper.*;
 
 import java.util.List;
 import java.util.Optional;
@@ -54,12 +53,12 @@ final class PoliteScraperTest {
     }
 
     @Test
-    void defaultMinimumWaitBetweenCalls() throws Exception {
+    void defaultMinimumWaitBetweenCalls() throws InterruptedException {
         testMinWaitBetween(defaultScraper, DEFAULT_MIN_WAIT_BETWEEN);
     }
 
     @Test
-    void configurableMinWaitBetween() throws Exception {
+    void configurableMinWaitBetween() throws InterruptedException {
         PoliteScraper scraper = new PoliteScraperBuilder(driver, brain)
                 .random(rand)
                 .timeProvider(timeProvider)
@@ -69,7 +68,7 @@ final class PoliteScraperTest {
     }
 
     @Test
-    void configurableStdWaitBetween() throws Exception {
+    void configurableStdWaitBetween() throws InterruptedException {
         PoliteScraper scraper = new PoliteScraperBuilder(driver, brain)
                 .random(rand)
                 .timeProvider(timeProvider)
@@ -91,12 +90,12 @@ final class PoliteScraperTest {
     }
 
     @Test
-    void defaultWaitPageLoad() throws Exception {
+    void defaultWaitPageLoad() throws InterruptedException {
         testWaitLoad(defaultScraper, DEFAULT_WAIT_LOAD);
     }
 
     @Test
-    void configurableWaitLoad() throws Exception {
+    void configurableWaitLoad() throws InterruptedException {
         PoliteScraper scraper = new PoliteScraperBuilder(driver, brain)
                 .random(rand)
                 .timeProvider(timeProvider)
@@ -118,7 +117,7 @@ final class PoliteScraperTest {
     }
 
     @Test
-    void waitsUntilPageFullyLoaded() throws Exception {
+    void waitsUntilPageFullyLoaded() throws InterruptedException {
         when(timeProvider.currentTimeMillis())
                 .thenReturn(0L)
                 .thenReturn(1L);
@@ -133,12 +132,12 @@ final class PoliteScraperTest {
     }
 
     @Test
-    void timesOutAfterMaxWait() throws Exception {
+    void timesOutAfterMaxWait() throws InterruptedException {
         testTimeout(defaultScraper, DEFAULT_MAX_WAIT_LOAD);
     }
 
     @Test
-    void configurableTimeout() throws Exception {
+    void configurableTimeout() throws InterruptedException {
         PoliteScraper scraper = new PoliteScraperBuilder(driver, brain)
                 .random(rand)
                 .timeProvider(timeProvider)
@@ -233,7 +232,7 @@ final class PoliteScraperTest {
         verify(brain, times(1)).notifyDone(URL, SOURCE);
     }
 
-    private void testBackOff(PoliteScraper scraper, long backOffSeconds) throws Exception {
+    private void testBackOff(PoliteScraper scraper, long backOffSeconds) throws InterruptedException {
         when(timeProvider.currentTimeMillis())
                 .thenReturn(0L) // Getting time between calls
                 .thenReturn(1L); // Last request

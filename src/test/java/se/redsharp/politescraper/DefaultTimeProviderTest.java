@@ -8,7 +8,7 @@ import org.junit.jupiter.api.*;
 
 final class DefaultTimeProviderTest {
 
-    public static final long SLEEP_MS = 100L;
+    private static final long SLEEP_MS = 100L;
     private static final long MAX_TIME_FOR_TEST = 30;
     private final DefaultTimeProvider provider = new DefaultTimeProvider();
 
